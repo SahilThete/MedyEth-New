@@ -2,75 +2,83 @@ import React, { useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
-import "./css/PatientLogin.css"
+import { getWallet } from "../../utils/wallet";
+import "./css/PatientLogin.css";
 
 const PatientLogin = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [errorMessage, setErrorMessage] = useState(null);
-    const { setToken } = useContext(AuthContext);
-    const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const { setToken } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axios.post("/api/auth/patientlogin", {
-                email: email,
-                password: password,
-            });
-            setToken(response.data.token);
-            localStorage.setItem("token", response.data.token);
-            localStorage.setItem("blockchainAddress", response.data.decryptedAddress);
-            localStorage.setItem("patientEmail", email);
-            navigate("/patient-dashboard");
-        } catch (error) {
-            console.error("Authentication failed:", error);
-            setToken(null);
-            localStorage.removeItem("token");
-            if (error.response && error.response.data) {
-                setErrorMessage(error.response.data);
-            } else {
-                setErrorMessage("An unexpected error occurred. Please try again.");
-            }
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setIsLoggingIn(true);
+    try {
+      // Ensure wallet connected so we can store address locally
+      let walletAddress = null;
+      try {
+        const { address } = await getWallet();
+        walletAddress = address;
+      } catch (walletErr) {
+        // wallet not required for login, still proceed
+        console.warn('Wallet not connected during login:', walletErr?.message || walletErr);
+      }
 
-    return (
-        <div className="login-container">
-          <h2 className="login-title">Patient Login</h2>
-          <p className="login-description">Welcome back! Please login to access your account.</p>
-          {errorMessage && <div className="error-message">{errorMessage}</div>}
-          <div className="login-form">
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="email">Email Address</label>
-                <input
-                  id="email"
-                  className="login-input"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email Address"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="password">Password</label>
-                <input
-                  id="password"
-                  className="login-input"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  required
-                />
-              </div>
-              <button className="login-button" type="submit">Login</button>
-            </form>
-          </div>
+      const response = await axios.post("/api/auth/patientlogin", {
+        email,
+        password,
+      });
+
+      if (response.data?.token) {
+        setToken(response.data.token);
+        localStorage.setItem("token", response.data.token);
+      }
+      const addr = response.data?.decryptedAddress || walletAddress;
+      if (addr) localStorage.setItem("blockchainAddress", addr);
+      localStorage.setItem("patientEmail", email);
+
+      navigate("/patient-dashboard");
+    } catch (error) {
+      console.error("Authentication failed:", error);
+      setToken(null);
+      localStorage.removeItem("token");
+      const errMsg = error?.response?.data || error?.message || "An unexpected error occurred. Please try again.";
+      setMessage(errMsg);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  return (
+    <div className="dashboard-container" style={{ minHeight: '80vh' }}>
+      <div className="dashboard-main">
+        <div className="welcome-section">
+          <h1>Patient Login</h1>
+          <p className="login-description">Welcome back — connect your wallet to access your records.</p>
         </div>
-      );
+
+        <div className="tab-content" style={{ maxWidth: 520 }}>
+          {message && <div className="request-card" style={{ marginBottom: 12 }}>{message}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <label>Email Address</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required disabled={isLoggingIn} />
+
+            <label>Password</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required disabled={isLoggingIn} />
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+              <button type="submit" className="btn-success" disabled={isLoggingIn}>{isLoggingIn ? 'Logging in...' : 'Login'}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default PatientLogin;

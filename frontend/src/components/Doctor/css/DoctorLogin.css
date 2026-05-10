@@ -1,100 +1,17 @@
-.doctor-login-container {
-  min-height: 100vh;
+.dashboard-container { font-family: 'Inter', sans-serif; }
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.tab-content { max-width: 520px; margin: 2rem auto; }
 
-  background:
-    linear-gradient(
-      135deg,
-      #0f172a,
-      #1e293b,
-      #0f766e
-    );
+.login-description { color: #6b7280; margin-bottom: 1rem; }
+
+.tab-content label { display:block; margin-bottom:6px; color:#374151; font-weight:600; }
+
+.tab-content input, .tab-content select {
+  width: 100%; padding:12px; margin-bottom:12px; border:1px solid #e5e7eb; border-radius:8px; background:white;
 }
 
-.doctor-login-card {
-  width: 440px;
+.btn-success { padding:12px 20px; border-radius:999px; border:none; color:white; font-weight:600; background:linear-gradient(135deg,#14b8a6,#0ea5e9); cursor:pointer; }
 
-  background:
-    rgba(15,23,42,0.75);
+.request-card { padding:12px 16px; border-radius:8px; background:#f8fafc; border:1px solid #e6eef6; }
 
-  backdrop-filter: blur(20px);
-
-  border:
-    1px solid rgba(255,255,255,0.08);
-
-  border-radius: 28px;
-
-  padding: 42px;
-
-  box-shadow:
-    0 30px 60px rgba(0,0,0,0.3);
-}
-
-.doctor-login-title {
-  color: white;
-
-  font-size: 2rem;
-
-  font-weight: 800;
-
-  margin-bottom: 10px;
-}
-
-.doctor-login-subtitle {
-  color: #94a3b8;
-
-  margin-bottom: 30px;
-}
-
-.doctor-input {
-  width: 100%;
-
-  padding: 16px;
-
-  border-radius: 14px;
-
-  border:
-    1px solid rgba(255,255,255,0.08);
-
-  background:
-    rgba(255,255,255,0.04);
-
-  color: white;
-
-  margin-bottom: 18px;
-}
-
-.doctor-input:focus {
-  outline: none;
-
-  border-color: #38bdf8;
-
-  box-shadow:
-    0 0 0 4px rgba(56,189,248,0.1);
-}
-
-.doctor-login-btn {
-  width: 100%;
-
-  padding: 16px;
-
-  border: none;
-
-  border-radius: 14px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #2563eb,
-      #0ea5e9
-    );
-
-  color: white;
-
-  font-weight: 700;
-
-  cursor: pointer;
-}
+@media (max-width:768px) { .tab-content { padding:1rem; } }

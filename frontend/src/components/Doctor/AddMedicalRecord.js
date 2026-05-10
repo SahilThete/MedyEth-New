@@ -11,8 +11,9 @@ const contractAddress = config.contractAddress;
 function AddMedicalRecord() {
     const { patientAddress } = useParams();
     const [data, setData] = useState("");
-    const [doctorName, setDoctorName] = useState("");
+    const [doctorName, setDoctorName] = useState(() => localStorage.getItem('doctorName') || "");
     const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -31,11 +32,10 @@ function AddMedicalRecord() {
             // Reset form fields
             setData("");
             setDoctorName("");
-
-            alert("Medical record added successfully!");
+            setMessage('Medical record added successfully.');
         } catch (error) {
             console.error("Error adding medical record:", error);
-            alert("An error occurred while adding medical record. Please try again later.");
+            setMessage('An error occurred while adding medical record. Please try again later.');
         } finally {
             setLoading(false);
         }
@@ -46,16 +46,20 @@ function AddMedicalRecord() {
             <h2 className="add-medical-record-title">Add Medical Record</h2>
             <p className="add-medical-record-description">Enter the medical record details below:</p>
             <form onSubmit={handleSubmit} className="add-medical-record-form">
-                <label className="add-medical-record-label">
-                    Data:
-                    <textarea className="add-medical-record-textarea" value={data} onChange={(e) => setData(e.target.value)} required />
-                </label>
-                <label className="add-medical-record-label">
-                    Doctor's Name:
-                    <input className="add-medical-record-input" type="text" value={doctorName} onChange={(e) => setDoctorName(e.target.value)} required />
-                </label>
-                <button className="add-medical-record-button" type="submit" disabled={loading}>{loading ? "Adding..." : "Add Medical Record"}</button>
-            </form>
+                    {message && <div className="request-card" style={{ marginBottom: 12 }}>{message}</div>}
+                    <label className="add-medical-record-label">
+                        Data:
+                        <textarea className="add-medical-record-textarea" value={data} onChange={(e) => setData(e.target.value)} required disabled={loading} />
+                    </label>
+                    <label className="add-medical-record-label">
+                        Doctor's Name:
+                        <input className="add-medical-record-input" type="text" value={doctorName} onChange={(e) => setDoctorName(e.target.value)} required disabled={loading} />
+                    </label>
+                                <button className="btn-success" type="submit" disabled={loading}>
+                                    {loading && <span className="btn-spinner" aria-hidden></span>}
+                                    <span style={{ marginLeft: loading ? 8 : 0 }}>{loading ? "Adding..." : "Add Medical Record"}</span>
+                                </button>
+                </form>
         </div>
     );
 }

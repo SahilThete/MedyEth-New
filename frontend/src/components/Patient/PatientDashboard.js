@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import config from "../../utils/smartContract";
-import { getWallet } from '../../utils/wallet';
+import { getWallet, switchToNetwork } from '../../utils/wallet';
 import "./css/PatientDashboard.css"; // Import CSS file for styling
 const contractABI = config.contractABI;
 const contractAddress = config.contractAddress;
@@ -17,6 +17,7 @@ function PatientDashboard() {
     const [isFetchingRecords, setIsFetchingRecords] = useState(false);
     const [isFetchingRequests, setIsFetchingRequests] = useState(false);
     const [message, setMessage] = useState("");
+    const [networkPrompt, setNetworkPrompt] = useState({ show: false, expectedChainId: null, pendingDoctorAddress: null, pendingDoctorName: null });
     const [activeTab, setActiveTab] = useState("records");
     const navigate = useNavigate();
     const logout = () => {
@@ -103,21 +104,53 @@ function PatientDashboard() {
         setMessage("");
 
         try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
+                // Use centralized wallet util to ensure correct signer/provider
+                const { provider, signer, address: signerAddress } = await getWallet();
 
-            // Load contract
-            const contract = new ethers.Contract(contractAddress, contractABI, provider);
+                // Verify network matches expected chain from config
+                try {
+                    const net = await provider.getNetwork();
+                    if (config.chainId && net.chainId !== config.chainId) {
+                        const msg = `Wallet connected to chainId ${net.chainId} but expected ${config.chainId}.`;
+                        console.error(msg);
+                        // Show actionable prompt to switch network
+                        setNetworkPrompt({ show: true, expectedChainId: config.chainId, pendingDoctorAddress: doctorAddress, pendingDoctorName: doctorName });
+                        setMessage(`Failed to grant access to ${doctorName}. ${msg} Click 'Switch Network' to fix.`);
+                        return;
+                    }
+                } catch (netErr) {
+                    console.warn('Could not read provider network:', netErr?.message || netErr);
+                }
 
-            // Connect to contract with signer
-            const connectedContract = contract.connect(signer);
+                // Verify contract exists at configured address
+                const code = await provider.getCode(contractAddress);
+                if (!code || code === '0x') {
+                    const msg = `Smart contract not found at ${contractAddress}. Please ensure you're on the correct network.`;
+                    console.error(msg);
+                    setMessage(`Failed to grant access to ${doctorName}. ${msg}`);
+                    return;
+                }
 
-            console.log("Granting access to:", doctorAddress);
-            const tx = await connectedContract.grantDoctorAccess(doctorAddress);
-            console.log('Transaction:', tx);
+                // Load contract connected with signer
+                const connectedContract = new ethers.Contract(contractAddress, contractABI, signer);
 
-            // Wait for transaction confirmation
-            await tx.wait();
+                console.log('Granting access to:', doctorAddress, 'from', signerAddress, 'via contract', contractAddress);
+
+                // Estimate gas to catch upfront RPC failures
+                try {
+                    await connectedContract.estimateGas.grantDoctorAccess(doctorAddress);
+                } catch (gasErr) {
+                    console.error('estimateGas failed:', gasErr);
+                    const short = gasErr?.reason || gasErr?.message || 'Unable to estimate gas for this transaction.';
+                    setMessage(`Failed to grant access to ${doctorName}. ${short}`);
+                    return;
+                }
+
+                const tx = await connectedContract.grantDoctorAccess(doctorAddress);
+                console.log('Transaction:', tx);
+
+                // Wait for transaction confirmation
+                await tx.wait();
 
             // Remove the request from backend
             const patientEmail = localStorage.getItem("patientEmail");
@@ -128,8 +161,10 @@ function PatientDashboard() {
             });
 
             // Remove from local state
-            setAccessRequests(prev => prev.filter(req => req.doctorBlockchainAddress?.toLowerCase()  !== doctorAddress?.toLowerCase()));
-            setMessage(`Access granted to ${doctorName} successfully!`);
+                setAccessRequests(prev => prev.filter(req => req.doctorBlockchainAddress?.toLowerCase()  !== doctorAddress?.toLowerCase()));
+                setMessage(`Access granted to ${doctorName} successfully!`);
+                // clear any pending network prompt state
+                setNetworkPrompt({ show: false, expectedChainId: null, pendingDoctorAddress: null, pendingDoctorName: null });
         } catch (error) {
             console.error("Error granting access:", error);
             // extract useful message from different error shapes
@@ -137,6 +172,27 @@ function PatientDashboard() {
             setMessage(`Failed to grant access to ${doctorName}. ${errMsg}`);
         } finally {
             setLoadingRequests(prev => ({ ...prev, [doctorAddress]: false }));
+        }
+    }
+
+    async function handleSwitchNetwork() {
+        const expected = networkPrompt.expectedChainId || config.chainId;
+        if (!expected) {
+            setMessage('No target chain configured.');
+            return;
+        }
+
+        setMessage('Requesting wallet to switch network...');
+        const ok = await switchToNetwork(expected);
+        if (ok) {
+            setMessage('Network switched. Re-attempting action...');
+            // retry the pending grant if present
+            const addr = networkPrompt.pendingDoctorAddress;
+            const name = networkPrompt.pendingDoctorName;
+            setNetworkPrompt({ show: false, expectedChainId: null, pendingDoctorAddress: null, pendingDoctorName: null });
+            if (addr) await grantDoctorAccess(addr, name);
+        } else {
+            setMessage('Could not switch network. Please switch manually in MetaMask.');
         }
     }
 
@@ -351,6 +407,17 @@ function PatientDashboard() {
                                     <i className="fas fa-inbox"></i>
                                     <h3>No Pending Requests</h3>
                                     <p>You don't have any pending access requests at the moment.</p>
+                                </div>
+                            )}
+
+                            {/* Network switch prompt card */}
+                            {networkPrompt.show && (
+                                <div className="request-card" style={{ marginTop: 12 }}>
+                                    <div style={{ marginBottom: 8 }}>Detected network mismatch. Expected chainId: {networkPrompt.expectedChainId}.</div>
+                                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                                        <button className="btn btn-outline" onClick={() => setNetworkPrompt({ show: false, expectedChainId: null })}>Dismiss</button>
+                                        <button className="btn btn-success" onClick={handleSwitchNetwork}>Switch Network</button>
+                                    </div>
                                 </div>
                             )}
                         </>

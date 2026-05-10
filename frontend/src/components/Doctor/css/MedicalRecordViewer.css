@@ -29,3 +29,40 @@
   font-size: 16px;
   color: #fff;
 }
+
+/* Shared request card used for messages */
+.request-card {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e6eef6;
+  color: #0f172a;
+}
+
+/* Primary success button reused across components */
+.btn-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg,#14b8a6,#0ea5e9);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Small spinner for buttons */
+.btn-spinner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: rgba(255,255,255,0.95);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
