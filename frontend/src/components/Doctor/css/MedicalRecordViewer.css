@@ -1,0 +1,31 @@
+.medical-record-viewer-container {
+  background: linear-gradient(to bottom right, #3498db, #2ecc71);
+  padding: 20px;
+  border-radius: 10px;
+  min-height: 100vh;
+}
+
+.medical-record-viewer-title {
+  font-size: 24px;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.medical-record-list {
+  list-style: none;
+  padding: 0;
+}
+
+.medical-record-item {
+  background-color: #fff;
+  padding: 10px;
+  margin-bottom: 10px;
+  margin-left: 10%;
+  margin-right: 10%;
+  border-radius: 5px;
+}
+
+.no-medical-records-message {
+  font-size: 16px;
+  color: #fff;
+}

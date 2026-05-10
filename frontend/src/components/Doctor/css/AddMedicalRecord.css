@@ -1,0 +1,71 @@
+.add-medical-record-container {
+  min-height: 100vh;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f8fafc,
+      #e2e8f0
+    );
+
+  padding: 60px;
+}
+
+.add-medical-record-title {
+  font-size: 24px;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.add-medical-record-description {
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.add-medical-record-form {
+  background: white;
+
+  max-width: 900px;
+
+  margin: auto;
+
+  padding: 42px;
+
+  border-radius: 28px;
+
+  box-shadow:
+    0 20px 50px rgba(15,23,42,0.06);
+}
+
+.add-medical-record-label {
+  display: block;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.add-medical-record-textarea,
+.add-medical-record-input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  outline: none;
+}
+
+.add-medical-record-button {
+  width: 200px;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.add-medical-record-button:hover {
+  background-color: #0056b3;
+}

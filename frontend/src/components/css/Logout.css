@@ -1,0 +1,22 @@
+.logout-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .logout-message {
+    font-size: 32px;
+    color: #333;
+    animation: fadeOut 1s ease-in-out forwards;
+  }
+  
+  @keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  

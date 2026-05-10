@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Itim&display=swap');
+
+/* Page Container Styles */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FF69B4, #2A1B3D); /* Midnight purple to hot pink gradient */
+}
+
+/* Registration Header Styles */
+.registration-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.registration-header .page-title {
+  font-family: 'Itim', sans-serif; /* Itim font */
+  font-size: 36px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.registration-header .page-description {
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+/* Patient Registration Form Styles */
+.patient-registration-container {
+  width: 80%;
+  background-color: #f0f0f0; /* Light gray background */
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Soft shadow effect */
+}
+
+/* Label */
+.patient-registration-container label {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.patient-registration-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.patient-registration-container input {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.patient-registration-container button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #3498db; /* Blue button color */
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.patient-registration-container button:hover {
+  background-color: #2980b9; /* Darker blue on hover */
+}
+
+/* Error Message Styles */
+.error-message {
+  color: red;
+  margin-bottom: 10px;
+}
