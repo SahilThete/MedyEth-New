@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./AIChatbot.css";
 
@@ -17,8 +17,17 @@ function AIChatbot() {
 
     const [loading, setLoading] = useState(false);
 
+    const messagesEndRef = useRef(null);
+    useEffect(() => {
+
+        messagesEndRef.current?.scrollIntoView({
+            behavior: "smooth"
+        });
+
+    }, [messages, loading]);
+
     const sendMessage = async () => {
-        if (!input.trim()) return;
+        if (!input.trim() || loading) return;
         const userMessage = {
             sender: "user",
             text: input
@@ -83,10 +92,15 @@ function AIChatbot() {
                             {
                                 loading && (
                                     <div className="message ai">
-                                        Typing...
+                                        <div className="typing-indicator">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
                                     </div>
                                 )
                             }
+                            <div ref={messagesEndRef} />
                         </div>
 
                         <div className="chatbot-input-container">
@@ -96,12 +110,15 @@ function AIChatbot() {
                                 onChange={(e) => setInput(e.target.value)}
                                 placeholder="Ask MedyEth AI..."
                                 onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
+                                    if (e.key === "Enter" && !loading) {
                                         sendMessage();
                                     }
                                 }}
+                                disabled={loading}
                             />
-                            <button onClick={sendMessage}> Send </button>
+                            <button onClick={sendMessage} disabled={loading}>
+                                Send
+                            </button>
                         </div>
                     </div>
                 )
