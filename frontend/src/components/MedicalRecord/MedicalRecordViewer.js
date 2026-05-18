@@ -7,7 +7,6 @@ import "./css/MedicalRecordViewer.css"
 
 const contractABI = config.contractABI;
 const contractAddress = config.contractAddress;
-const jsonRpcProviderUrl = config.jsonRpcProviderUrl;
 
 function MedicalRecordViewer() {
   const { patientAddress } = useParams();
@@ -28,7 +27,7 @@ function MedicalRecordViewer() {
             const fetchedRecords = await connectedContract.viewPatientMedicalRecords(patientAddress);
 
         // Update state with fetched medical records
-        setMedicalRecords(fetchedRecords || []);
+        setMedicalRecords(Array.isArray(fetchedRecords) ? fetchedRecords : []);
         if (!fetchedRecords || fetchedRecords.length === 0) setMessage('No medical records found for this patient.');
       } catch (error) {
         console.error("Error fetching medical records:", error);
@@ -46,9 +45,25 @@ function MedicalRecordViewer() {
       <h2 className="medical-record-viewer-title">Medical Records for Patient: {patientAddress}</h2>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <div />
-        <button className="btn-success" onClick={async () => { setIsLoading(true); setMessage('Refreshing...'); try { const { signer } = await getWallet(); const connectedContract = new ethers.Contract(contractAddress, contractABI, signer); const fetchedRecords = await connectedContract.viewPatientMedicalRecords(patientAddress); setMedicalRecords(fetchedRecords || []); setMessage((fetchedRecords && fetchedRecords.length) ? '' : 'No medical records found for this patient.'); } catch (err) { console.error(err); setMessage('Failed to refresh records.'); } finally { setIsLoading(false); } }} disabled={isLoading}>
-          {isLoading && <span className="btn-spinner" aria-hidden></span>}
-          <span style={{ marginLeft: isLoading ? 8 : 0 }}>{isLoading ? 'Loading...' : 'Refresh'}</span>
+        <button className="btn-success" onClick={async () => { 
+          setIsLoading(true); 
+          setMessage('Refreshing...'); 
+          
+          try { 
+            const { signer } = await getWallet(); 
+            const connectedContract = new ethers.Contract(contractAddress, contractABI, signer); 
+            const fetchedRecords = await connectedContract.viewPatientMedicalRecords(patientAddress); 
+            setMedicalRecords(Array.isArray(fetchedRecords) ? fetchedRecords : []); 
+            setMessage((fetchedRecords && fetchedRecords.length) ? '' : 'No medical records found for this patient.'); 
+
+          } catch (err) { 
+            console.error(err); setMessage('Failed to refresh records.'); 
+          } finally { 
+            setIsLoading(false);
+          } 
+        }} disabled={isLoading}>
+        {isLoading && <span className="btn-spinner" aria-hidden></span>}
+        <span style={{ marginLeft: isLoading ? 8 : 0 }}>{isLoading ? 'Loading...' : 'Refresh'}</span>
         </button>
       </div>
 
@@ -63,7 +78,7 @@ function MedicalRecordViewer() {
                 <li key={index} className="medical-record-item">
                   <p><strong>Data:</strong> {record.data}</p>
                   <p><strong>Doctor:</strong> {record.doctorName}</p>
-                  <p><strong>Created At:</strong> {new Date(record.createdAt * 1000).toLocaleString()}</p>
+                  <p><strong>Created At:</strong> {new Date(Number(record.createdAt) * 1000).toLocaleString()}</p>
                 </li>
               ))}
             </ul>

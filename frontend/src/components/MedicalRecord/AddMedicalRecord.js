@@ -24,18 +24,20 @@ function AddMedicalRecord() {
             const connectedContract = new ethers.Contract(contractAddress, contractABI, signer);
 
             // Call updatePatientMedicalRecord function
-
-            const transaction = await connectedContract.updatePatientMedicalRecord(patientAddress, data, doctorName);
+            const transaction = await connectedContract.updatePatientMedicalRecord(patientAddress, data, doctorName, {gasLimit: 500000});
             // Wait for transaction to be mined
             await transaction.wait();
-
+            await new Promise(resolve => setTimeout(resolve, 1200));
             // Reset form fields
             setData("");
             setDoctorName("");
             setMessage('Medical record added successfully.');
+
         } catch (error) {
             console.error("Error adding medical record:", error);
-            setMessage('An error occurred while adding medical record. Please try again later.');
+            const errorMessage = error?.reason || error?.data?.message || error?.error?.message || error?.message || "Failed to add medical record.";
+            setMessage(errorMessage);
+            
         } finally {
             setLoading(false);
         }
