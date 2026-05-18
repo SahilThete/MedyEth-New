@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
-import { AuthContext } from "../AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { getWallet } from "../../utils/wallet";
 import "./css/DoctorLogin.css";
@@ -25,22 +25,26 @@ const DoctorLogin = () => {
 
     try {
       // Attempt to get wallet address but do not block login
-      let walletAddr = null;
+      let walletAddress = null;
       try {
         const { address } = await getWallet(true);
-        walletAddr = address;
-      } catch (err) {
-        console.warn('Wallet not connected during doctor login:', err?.message || err);
+        walletAddress = address;
+      } catch (walletErr) {
+      // wallet not required for login, still proceed
+        console.warn('Wallet not connected during doctor login:', walletErr?.message || walletErr);
       }
 
-      const response = await axios.post("/api/auth/doctorlogin", { email, password });
+      const response = await axios.post("/api/auth/doctorlogin", {
+        email,
+        password,
+      });
+
       if (response.data?.token) {
         setToken(response.data.token);
         localStorage.setItem("token", response.data.token);
       }
-      const addr = response.data?.decryptedAddress || walletAddr;
+      const addr = response.data?.decryptedAddress || walletAddress;
       if (addr) {
-        localStorage.setItem("blockchainAddress", addr);
         localStorage.setItem("doctorAddress", addr);
       }
       localStorage.setItem("doctorEmail", email);
@@ -75,6 +79,7 @@ const DoctorLogin = () => {
 
         <div className="tab-content" style={{ maxWidth: 520 }}>
           {message && <div className="request-card" style={{ marginBottom: 12 }}>{message}</div>}
+          
           <form onSubmit={handleSubmit}>
             <label>Email Address</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required disabled={isLoggingIn} />

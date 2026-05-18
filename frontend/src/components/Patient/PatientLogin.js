@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
-import { AuthContext } from "../AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { getWallet } from "../../utils/wallet";
 import "./css/PatientLogin.css";
@@ -31,7 +31,7 @@ const PatientLogin = () => {
         walletAddress = address;
       } catch (walletErr) {
         // wallet not required for login, still proceed
-        console.warn('Wallet not connected during login:', walletErr?.message || walletErr);
+        console.warn('Wallet not connected during patient login:', walletErr?.message || walletErr);
       }
 
       const response = await axios.post("/api/auth/patientlogin", {
@@ -44,8 +44,11 @@ const PatientLogin = () => {
         localStorage.setItem("token", response.data.token);
       }
       const addr = response.data?.decryptedAddress || walletAddress;
-      if (addr) localStorage.setItem("blockchainAddress", addr);
+      if (addr) {
+        localStorage.setItem("patientAddress", addr);
+      }
       localStorage.setItem("patientEmail", email);
+      if (response.data?.name) localStorage.setItem("doctorName", response.data.name);
 
       navigate("/patient-dashboard");
     } catch (error) {
