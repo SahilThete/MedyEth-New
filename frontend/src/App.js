@@ -5,7 +5,7 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import { AuthProvider } from "./components/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 
 /* ---------- Shared Pages ---------- */
 import Home from "./components/Shared/Home";
@@ -26,7 +26,7 @@ import MedicalRecordViewer from "./components/MedicalRecord/MedicalRecordViewer"
 import AddMedicalRecord from "./components/MedicalRecord/AddMedicalRecord";
 
 /* ---------- Future AI Module ---------- */
-// import AIChatbot from "./components/AIChatBot/AIChatbot";
+import AIChatbot from "./components/AIChatBot/AIChatbot";
 
 function App() {
   return (
@@ -54,15 +54,14 @@ function App() {
           <Route path="/medical-records/:patientAddress" element={<MedicalRecordViewer />} />
           <Route path="/add-medical-record/:patientAddress" element={<AddMedicalRecord />} />
            
-
-          {/* ---------- Future AI Module ---------- */}
-          {/* <Route path="/ai-chatbot" element={<AIChatbot />} /> */}
-
           {/* ---------- Catch All ---------- */}
           <Route path="*" element={<Navigate to="/home" replace />} />
 
         </Routes>
+
+      <AIChatbot />
       </AuthProvider>
+      
     </Router>
   );
 }
