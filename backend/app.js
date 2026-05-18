@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/auth");
+const aiRoutes = require("./routes/aiRoutes");
 const cors = require("cors"); // Import the CORS middleware
 require("dotenv").config();
 
@@ -25,6 +26,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use("/api/auth", authRoutes); // All the routes defined in auth.js will be prefixed with /api/auth
+app.use("/api/ai", aiRoutes); // All the routes defined in aiRoutes.js will be prefixed with /api/ai
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
