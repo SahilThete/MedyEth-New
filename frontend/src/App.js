@@ -1,4 +1,5 @@
 import React from "react";
+import { Toaster } from "react-hot-toast";
 import {
   BrowserRouter as Router,
   Route,
@@ -59,8 +60,32 @@ function App() {
 
         </Routes>
 
-      <AIChatbot />
       </AuthProvider>
+      <AIChatbot />
+
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: "#0f172a",
+            color: "#fff",
+            borderRadius: "12px",
+            padding: "14px 16px",
+            fontSize: "14px",
+          },
+          success: {
+            style: {
+              background: "#16a34a",
+            },
+          },
+          error: {
+            style: {
+              background: "#dc2626",
+            },
+          },
+        }}
+      />
       
     </Router>
   );

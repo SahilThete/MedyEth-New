@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { getWallet } from "../../utils/wallet";
@@ -49,8 +50,10 @@ const DoctorLogin = () => {
       }
       localStorage.setItem("doctorEmail", email);
       if (response.data?.name) localStorage.setItem("doctorName", response.data.name);
-
+      
+      toast.success("Login successful! Redirecting to dashboard...");
       navigate("/doctor-dashboard");
+
     } catch (error) {
       console.error("Authentication failed:", error);
       setToken(null);
@@ -63,7 +66,8 @@ const DoctorLogin = () => {
           error?.response?.data?.error ||
           error?.message ||
           "Authentication failed. Please check your credentials and try again.";
-      setMessage(errorMessage);
+      toast.error(errorMessage);
+
     } finally {
       setIsLoggingIn(false);
     }

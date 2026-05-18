@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { ethers } from "ethers";
 import { useNavigate } from "react-router-dom";
-import config from "../../utils/smartContract";
 import axios from "axios";
-import "./css/DoctorDashboard.css"
+import toast from "react-hot-toast";
+import config from "../../utils/smartContract";
 import { getWallet, getReadOnlyProvider } from '../../utils/wallet';
+import "./css/DoctorDashboard.css"; // Import CSS file for styling
 
 const contractABI = config.contractABI;
 const contractAddress = config.contractAddress;
@@ -106,12 +107,12 @@ function DoctorDashboard({ account, hospitalAddress }) {
             }
 
             if (!doctorAddress) {
-                alert("Doctor blockchain address not found. Please connect your wallet or login.");
+                toast.error("Doctor blockchain address not found. Please connect your wallet or login.");
                 return;
             }
 
             if (!requestedPatientEmail.trim()) {
-                alert("Please enter a patient email.");
+                toast.error("Please enter a patient email.");
                 return;
             }
 
@@ -127,15 +128,15 @@ function DoctorDashboard({ account, hospitalAddress }) {
             });
             console.log(response);
             if (response.status === 200) {
-                alert(response.data.message || "Access request sent successfully.");
+                toast.success(response.data.message || "Access request sent successfully.");
                 setrequestedPatientEmail(""); // Clear the input
             } else {
-                alert("Failed to send access request. Please try again later.");
+                toast.error("Failed to send access request. Please try again later.");
             }
         } catch (error) {
             console.error("Error sending access request:", error);
             const errorMessage = error.response?.data?.error || "An error occurred while sending access request. Please try again later.";
-            alert(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setIsRequestingAccess(false);
         }
@@ -234,7 +235,7 @@ function DoctorDashboard({ account, hospitalAddress }) {
                 <div className="panel-title">Request Access</div>
                 <form onSubmit={(e) => { e.preventDefault(); requestAccess(); }} className="access-request-form">
                     <label className="input-label">Patient's Email:
-                        <input type="text" value={requestedPatientEmail} onChange={(e) => setrequestedPatientEmail(e.target.value)} required disabled={isRequestingAccess} />
+                        <input type="email" value={requestedPatientEmail} onChange={(e) => setrequestedPatientEmail(e.target.value)} required disabled={isRequestingAccess} />
                     </label>
                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <button type="submit" className="request-access-button" disabled={isRequestingAccess}>{isRequestingAccess ? 'Sending...' : 'Request Access'}</button>

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { ethers } from "ethers";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import toast from "react-hot-toast";
 import config from "../../utils/smartContract";
 import { getWallet, switchToNetwork } from '../../utils/wallet';
 import "./css/PatientDashboard.css"; // Import CSS file for styling
@@ -53,7 +53,7 @@ function PatientDashboard() {
         } catch (error) {
             console.error("Error fetching medical records:", error);
             setMedicalRecords([]);
-            setMessage("Failed to load medical records. Please try again.");
+            toast.error("Failed to load medical records. Please try again.");
         } finally {
             setIsFetchingRecords(false);
         }
@@ -87,7 +87,7 @@ function PatientDashboard() {
         } catch (error) {
             console.error("Error fetching access requests:", error);
             setAccessRequests([]);
-            setMessage("Failed to load access requests. Please try again.");
+            toast.error("Failed to load access requests. Please try again.");
         } finally {
             setIsFetchingRequests(false);
         }
@@ -115,7 +115,7 @@ function PatientDashboard() {
                         console.error(msg);
                         // Show actionable prompt to switch network
                         setNetworkPrompt({ show: true, expectedChainId: config.chainId, pendingDoctorAddress: doctorAddress, pendingDoctorName: doctorName });
-                        setMessage(`Failed to grant access to ${doctorName}. ${msg} Click 'Switch Network' to fix.`);
+                        toast.error(`Failed to grant access to ${doctorName}. ${msg} Click 'Switch Network' to fix.`);
                         return;
                     }
                 } catch (netErr) {
@@ -127,12 +127,12 @@ function PatientDashboard() {
                 if (!code || code === '0x') {
                     const msg = `Smart contract not found at ${contractAddress}. Please ensure you're on the correct network.`;
                     console.error(msg);
-                    setMessage(`Failed to grant access to ${doctorName}. ${msg}`);
+                    toast.error(`Failed to grant access to ${doctorName}. ${msg}`);
                     return;
                 }
 
                 if (!ethers.utils.isAddress(doctorAddress)) {
-                    setMessage("Invalid doctor blockchain address.");
+                    toast.error("Invalid doctor blockchain address.");
                     return;
                 }
 
@@ -147,7 +147,7 @@ function PatientDashboard() {
                 } catch (gasErr) {
                     console.error('estimateGas failed:', gasErr);
                     const short = gasErr?.reason || gasErr?.message || 'Unable to estimate gas for this transaction.';
-                    setMessage(`Failed to grant access to ${doctorName}. ${short}`);
+                    toast.error(`Failed to grant access to ${doctorName}. ${short}`);
                     return;
                 }
 
@@ -167,14 +167,14 @@ function PatientDashboard() {
 
             // Remove from local state
                 setAccessRequests(prev => prev.filter(req => req.doctorBlockchainAddress?.toLowerCase()  !== doctorAddress?.toLowerCase()));
-                setMessage(`Access granted to ${doctorName} successfully!`);
+                toast.success(`Access granted to ${doctorName} successfully!`);
                 // clear any pending network prompt state
                 setNetworkPrompt({ show: false, expectedChainId: null, pendingDoctorAddress: null, pendingDoctorName: null });
         } catch (error) {
             console.error("Error granting access:", error);
             // extract useful message from different error shapes
             const errMsg = error?.reason || error?.error?.message || error?.message || error?.data || (error?.response && (error.response.data && (error.response.data.error || error.response.data.message))) || JSON.stringify(error);
-            setMessage(`Failed to grant access to ${doctorName}. ${errMsg}`);
+            toast.error(`Failed to grant access to ${doctorName}. ${errMsg}`);
         } finally {
             setLoadingRequests(prev => ({ ...prev, [doctorAddress]: false }));
         }
@@ -183,21 +183,21 @@ function PatientDashboard() {
     async function handleSwitchNetwork() {
         const expected = networkPrompt.expectedChainId || config.chainId;
         if (!expected) {
-            setMessage('No target chain configured.');
+            toast.error('No target chain configured.');
             return;
         }
 
-        setMessage('Requesting wallet to switch network...');
+        toast.info('Requesting wallet to switch network...');
         const ok = await switchToNetwork(expected);
         if (ok) {
-            setMessage('Network switched. Re-attempting action...');
+            toast.info('Network switched. Re-attempting action...');
             // retry the pending grant if present
             const addr = networkPrompt.pendingDoctorAddress;
             const name = networkPrompt.pendingDoctorName;
             setNetworkPrompt({ show: false, expectedChainId: null, pendingDoctorAddress: null, pendingDoctorName: null });
             if (addr) await grantDoctorAccess(addr, name);
         } else {
-            setMessage('Could not switch network. Please switch manually in MetaMask.');
+            toast.error('Could not switch network. Please switch manually in MetaMask.');
         }
     }
 

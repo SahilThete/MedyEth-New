@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { getWallet } from "../../utils/wallet";
@@ -27,7 +28,7 @@ const PatientLogin = () => {
       // Ensure wallet connected so we can store address locally
       let walletAddress = null;
       try {
-        const { address } = await getWallet();
+        const { address } = await getWallet(true);
         walletAddress = address;
       } catch (walletErr) {
         // wallet not required for login, still proceed
@@ -48,9 +49,11 @@ const PatientLogin = () => {
         localStorage.setItem("patientAddress", addr);
       }
       localStorage.setItem("patientEmail", email);
-      if (response.data?.name) localStorage.setItem("doctorName", response.data.name);
+      if (response.data?.name) localStorage.setItem("patientName", response.data.name);
 
+      toast.success("Login successful! Redirecting to dashboard...");
       navigate("/patient-dashboard");
+
     } catch (error) {
       console.error("Authentication failed:", error);
       setToken(null);
@@ -63,7 +66,8 @@ const PatientLogin = () => {
           error?.response?.data?.error ||
           error?.message ||
           "Authentication failed. Please check your credentials and try again.";
-      setMessage(errorMessage);
+      toast.error(errorMessage);
+
       } finally {
         setIsLoggingIn(false);
       }
