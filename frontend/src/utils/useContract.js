@@ -18,6 +18,7 @@ export function useContract() {
         console.error("Ethereum object not found, install MetaMask.");
         // Or connect to a default provider
         provider = new ethers.providers.JsonRpcProvider('https://sepolia.infura.io/v3/66912b8fd749492f9c844e6186b5d3d3');
+        // provider = new ethers.providers.JsonRpcProvider('https://sepolia.infura.io/v3/06d25618a0da4200983bb08856d5a352');
         contract = new ethers.Contract(contractAddress, contractABI, provider);
     }
 

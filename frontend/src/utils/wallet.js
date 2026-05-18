@@ -1,16 +1,43 @@
 import { ethers } from 'ethers';
 import config from './smartContract';
 
-export async function getWallet() {
+export async function getWallet(forceAccountSelection = false) {
+
   if (typeof window === 'undefined' || !window.ethereum) {
     throw new Error('No Ethereum wallet detected. Please install MetaMask.');
   }
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
-  // Request accounts if needed
-  await provider.send('eth_requestAccounts', []);
+
+  /*
+    Force MetaMask account selection popup
+    when switching between Patient and Doctor roles
+  */
+  if (forceAccountSelection) {
+
+    await window.ethereum.request({
+      method: 'wallet_requestPermissions',
+      params: [{ eth_accounts: {} }]
+    });
+    
+    await provider.send('eth_requestAccounts', []);
+  }
+
+  else {
+    await provider.send('eth_requestAccounts', []);
+  }
+
   const signer = provider.getSigner();
   const address = await signer.getAddress();
+  const network = await provider.getNetwork();
+
+  if (Number(network.chainId) !== Number(config.chainId)) {
+
+    throw new Error(
+      `Wrong network detected. Please switch MetaMask to Sepolia.`
+    );
+  }
+
   return { provider, signer, address };
 }
 

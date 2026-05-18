@@ -3,7 +3,6 @@ const config = {
     contractAddress: "0xa278918c5afF633187212D9088B0ec29cA54b7b8",
     jsonRpcProviderUrl: "https://sepolia.infura.io/v3/66912b8fd749492f9c844e6186b5d3d3",
     
-    
     // contractAddress: "0x905CFCbb92f67EbE1eB987c3Bf3fAC94E5978Fe8",
     // jsonRpcProviderUrl: "https://sepolia.infura.io/v3/06d25618a0da4200983bb08856d5a352",
 
