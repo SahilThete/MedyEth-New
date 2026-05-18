@@ -8,8 +8,9 @@ import {
 import { AuthProvider } from "./components/AuthContext";
 
 /* ---------- Shared Pages ---------- */
-import Home from "./components/Home";
-import Logout from "./components/Logout";
+import Home from "./components/Shared/Home";
+import Logout from "./components/Shared/Logout";
+
 /* ---------- Patient Pages ---------- */
 import PatientRegistration from "./components/Patient/PatientRegistration";
 import PatientLogin from "./components/Patient/PatientLogin";
