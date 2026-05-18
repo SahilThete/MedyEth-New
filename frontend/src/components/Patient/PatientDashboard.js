@@ -131,6 +131,11 @@ function PatientDashboard() {
                     return;
                 }
 
+                if (!ethers.utils.isAddress(doctorAddress)) {
+                    setMessage("Invalid doctor blockchain address.");
+                    return;
+                }
+
                 // Load contract connected with signer
                 const connectedContract = new ethers.Contract(contractAddress, contractABI, signer);
 
@@ -146,7 +151,7 @@ function PatientDashboard() {
                     return;
                 }
 
-                const tx = await connectedContract.grantDoctorAccess(doctorAddress);
+                const tx = await connectedContract.grantDoctorAccess(doctorAddress, { gasLimit: 300000 });
                 console.log('Transaction:', tx);
 
                 // Wait for transaction confirmation
@@ -292,7 +297,7 @@ function PatientDashboard() {
                                                 </div>
                                                 <div className="record-meta">
                                                     <div className="record-date">
-                                                        {new Date(record.createdAt * 1000).toLocaleDateString()}
+                                                        {new Date(Number(record.createdAt) * 1000).toLocaleDateString()}
                                                     </div>
                                                 </div>
                                             </div>

@@ -17,11 +17,17 @@ const DoctorLogin = () => {
     e.preventDefault();
     setMessage("");
     setIsLoggingIn(true);
+    
+    // Clear patient session leftovers
+    localStorage.removeItem("patientEmail");
+    localStorage.removeItem("patientName");
+    localStorage.removeItem("patientAddress");
+
     try {
       // Attempt to get wallet address but do not block login
       let walletAddr = null;
       try {
-        const { address } = await getWallet();
+        const { address } = await getWallet(true);
         walletAddr = address;
       } catch (err) {
         console.warn('Wallet not connected during doctor login:', err?.message || err);
@@ -45,8 +51,15 @@ const DoctorLogin = () => {
       console.error("Authentication failed:", error);
       setToken(null);
       localStorage.removeItem("token");
-      const errMsg = error?.response?.data || error?.message || "An unexpected error occurred. Please try again.";
-      setMessage(errMsg);
+      const errorMessage =
+          error?.reason ||
+          error?.data?.message ||
+          error?.error?.message ||
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          "Authentication failed. Please check your credentials and try again.";
+      setMessage(errorMessage);
     } finally {
       setIsLoggingIn(false);
     }

@@ -17,6 +17,12 @@ const PatientLogin = () => {
     e.preventDefault();
     setMessage("");
     setIsLoggingIn(true);
+    
+    // Clear doctor session leftovers
+    localStorage.removeItem("doctorEmail");
+    localStorage.removeItem("doctorName");
+    localStorage.removeItem("doctorAddress");
+
     try {
       // Ensure wallet connected so we can store address locally
       let walletAddress = null;
@@ -46,12 +52,19 @@ const PatientLogin = () => {
       console.error("Authentication failed:", error);
       setToken(null);
       localStorage.removeItem("token");
-      const errMsg = error?.response?.data || error?.message || "An unexpected error occurred. Please try again.";
-      setMessage(errMsg);
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
+      const errorMessage =
+          error?.reason ||
+          error?.data?.message ||
+          error?.error?.message ||
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          "Authentication failed. Please check your credentials and try again.";
+      setMessage(errorMessage);
+      } finally {
+        setIsLoggingIn(false);
+      }
+    };
 
   return (
     <div className="dashboard-container" style={{ minHeight: '80vh' }}>

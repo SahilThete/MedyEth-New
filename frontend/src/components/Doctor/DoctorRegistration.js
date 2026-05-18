@@ -26,12 +26,12 @@ const DoctorRegistration = () => {
     setErrorMessage("");
     setIsRegistering(true);
     try {
-      const { provider, signer, address } = await getWallet();
+      const { provider, signer, address } = await getWallet(true);
 
       // Attempt on-chain registration
       try {
-        const ethers = await import('ethers');
-        const contract = new ethers.Contract(contractAddress, contractABI, provider);
+        const { ethers } = await import("ethers");
+        const contract = new ethers.Contract(contractAddress, contractABI, signer);
         const name = `${firstName} ${lastName}`.trim();
         const tx = await contract.connect(signer).registerDoctor(name);
         await tx.wait();
@@ -52,8 +52,8 @@ const DoctorRegistration = () => {
         blockchainAddress: address,
       });
 
-      setErrorMessage('Registration successful. Redirecting...');
-      setTimeout(() => navigate('/doctor-dashboard'), 800);
+      setErrorMessage('Registration successful. Redirecting to login...');
+      setTimeout(() => navigate('/doctor-login'), 1200);
     } catch (error) {
       console.error('Doctor registration error:', error);
       const msg = error?.response?.data?.error || error?.message || 'Registration failed';
@@ -78,16 +78,16 @@ const DoctorRegistration = () => {
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required disabled={isRegistering} />
 
             <label>Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required disabled={isRegistering} />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required minLength={8} disabled={isRegistering} />
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <label>First Name</label>
-                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name" required disabled={isRegistering} />
+                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name" required minLength={2} maxLength={50} pattern="[A-Za-z ]+" autoComplete="given-name" disabled={isRegistering} />
               </div>
               <div>
                 <label>Last Name</label>
-                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name" required disabled={isRegistering} />
+                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name" required minLength={2} maxLength={50} pattern="[A-Za-z ]+" autoComplete="family-name" disabled={isRegistering} />
               </div>
             </div>
 
@@ -108,7 +108,7 @@ const DoctorRegistration = () => {
             </div>
 
             <label>Specialization</label>
-            <input type="text" value={Specility} onChange={(e) => setSpecialization(e.target.value)} placeholder="Specialization" required disabled={isRegistering} />
+            <input type="text" value={Specility} onChange={(e) => setSpecialization(e.target.value)} placeholder="Specialization" required minLength={2} maxLength={80} autoComplete="organization-title" disabled={isRegistering} />
 
             <label>Address</label>
             <input type="text" value={addressField} onChange={(e) => setAddressField(e.target.value)} placeholder="Address" required disabled={isRegistering} />

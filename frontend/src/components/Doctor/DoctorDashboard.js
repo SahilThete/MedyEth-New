@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import config from "../../utils/smartContract";
 import axios from "axios";
 import "./css/DoctorDashboard.css"
-import MedicalRecordViewer from "./MedicalRecordViewer"; // Import the component for viewing medical records
 import { getWallet, getReadOnlyProvider } from '../../utils/wallet';
 
 const contractABI = config.contractABI;
@@ -121,7 +120,7 @@ function DoctorDashboard({ account, hospitalAddress }) {
             console.log("Doctor Name:", doctorName)
             console.log("Doctor Address:", doctorAddress)
             const response = await axios.post(backendAPIUrl, {
-                patientEmail: requestedPatientEmail.trim(),
+                patientEmail: requestedPatientEmail.trim().toLowerCase(),
                 doctorName: doctorName,
                 doctorBlockchainAddress: doctorAddress,
                 hospitalAddress: hospitalAddress,

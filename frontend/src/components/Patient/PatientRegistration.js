@@ -14,7 +14,7 @@ const PatientRegistration = () => {
     const [password, setPassword] = useState("");
     const [FirstName, setFirstName] = useState("");
     const [LastName, setLastName] = useState("");
-    const [Age, setAge] = useState("");
+    const [DateOfBirth, setDateOfBirth] = useState("");
     const [Gender, setGender] = useState("");
     const [Weight, setWeight] = useState("");
     const [isRegistering, setIsRegistering] = useState(false);
@@ -27,18 +27,27 @@ const PatientRegistration = () => {
         setMessage("");
         setIsRegistering(true);
         try {
-            const { provider, signer, address } = await getWallet();
+            const { provider, signer, address } = await getWallet(true);
 
             // Register patient on-chain
             try {
-                const ethers = await import("ethers");
-                const contract = new ethers.Contract(contractAddress, contractABI, provider);
+                const { ethers } = await import("ethers");
+                const contract = new ethers.Contract(contractAddress, contractABI, signer);
                 const name = `${FirstName} ${LastName}`.trim();
                 const tx = await contract.connect(signer).registerPatient(name);
                 await tx.wait();
             } catch (chainErr) {
                 console.warn("On-chain registration failed:", chainErr?.message || chainErr);
                 // Not fatal for off-chain user creation; continue
+            }
+
+            // Calculate age from DOB for backend validation
+            const dob = new Date(DateOfBirth);
+            const today = new Date();
+            let calculatedAge = today.getFullYear() - dob.getFullYear();
+            const monthDifference = today.getMonth() - dob.getMonth();
+            if ( monthDifference < 0 || ( monthDifference === 0 && today.getDate() < dob.getDate())) {
+                calculatedAge--;
             }
 
             // Call backend registration
@@ -48,12 +57,13 @@ const PatientRegistration = () => {
                 FirstName,
                 LastName,
                 Gender,
-                Age,
+                DateOfBirth,
+                Age: calculatedAge,
                 Weight,
                 blockchainAddress: address,
             });
 
-            setMessage("Registration successful. Redirecting to dashboard...");
+            setMessage("Registration successful. Redirecting to login...");
             // Backend may or may not return token on registration; try to set if present
             if (response.data?.token) {
                 setToken(response.data.token);
@@ -65,7 +75,7 @@ const PatientRegistration = () => {
                 localStorage.setItem("blockchainAddress", address);
             }
 
-            setTimeout(() => navigate("/dashboard"), 900);
+            setTimeout(() => navigate("/patient-login"), 1200);
         } catch (error) {
             console.error("Registration failed:", error);
             const errMsg = error?.response?.data?.error || error?.message || "Registration failed.";
@@ -110,12 +120,12 @@ const PatientRegistration = () => {
 
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                             <div>
-                                <label>Age</label>
-                                <input type="number" value={Age} onChange={(e) => setAge(e.target.value)} placeholder="Age" required disabled={isRegistering} />
+                                <label>Date of Birth</label>
+                                <input type="date" value={DateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} required disabled={isRegistering} />
                             </div>
                             <div>
                                 <label>Weight</label>
-                                <input type="text" value={Weight} onChange={(e) => setWeight(e.target.value)} placeholder="Weight" required disabled={isRegistering} />
+                                <input type="text" value={Weight} onChange={(e) => setWeight(e.target.value)} placeholder="Weight" required min="1" max="500" step="0.1" autoComplete="off" disabled={isRegistering} />
                             </div>
                         </div>
 
